@@ -193,7 +193,7 @@ public class VersionCommand extends BukkitCommand {
                 return;
             }
             versionWaiters.add(sender);
-            sender.sendMessage(Component.text("Checking version, please wait...", NamedTextColor.WHITE, TextDecoration.ITALIC)); // Paper
+            sender.sendMessage(Component.text("Requesting server info...", NamedTextColor.WHITE, TextDecoration.ITALIC)); // Paper // obsidian
             if (!versionTaskStarted) {
                 versionTaskStarted = true;
                 new Thread(new Runnable() {
@@ -254,7 +254,8 @@ public class VersionCommand extends BukkitCommand {
     // Paper start
     private void setVersionMessage(final @NotNull Component msg) {
         lastCheck = System.currentTimeMillis();
-        final Component message = Component.textOfChildren(
+        // obsidian start
+        /* final Component message = Component.textOfChildren(
             Component.text(Bukkit.getVersionMessage(), NamedTextColor.WHITE),
             Component.newline(),
             msg
@@ -264,7 +265,9 @@ public class VersionCommand extends BukkitCommand {
             .hoverEvent(Component.text("Click to copy to clipboard", NamedTextColor.WHITE))
             .clickEvent(ClickEvent.copyToClipboard(PlainTextComponentSerializer.plainText().serialize(message)))
             .build();
-        // Paper end
+        // Paper end */
+        // obsidian end
+        this.versionMessage = msg; // obsidian
         versionLock.lock();
         try {
             hasVersion = true;

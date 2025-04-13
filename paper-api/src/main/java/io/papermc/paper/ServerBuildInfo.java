@@ -17,7 +17,7 @@ public interface ServerBuildInfo {
     /**
      * The brand id for Paper.
      */
-    Key BRAND_PAPER_ID = Key.key("papermc", "paper");
+    Key BRAND_PAPER_ID = Key.key("jiscaskalov", "obsidian"); // obsidian
 
     /**
      * Gets the {@code ServerBuildInfo}.
