@@ -31,9 +31,9 @@ if (!file(".git").exists()) {
     error(errorText)
 }
 
-rootProject.name = "paper"
+rootProject.name = "obsidian"
 
-for (name in listOf("paper-api", "paper-server")) {
+for (name in listOf("obsidian-api", "obsidian-server")) {
     include(name)
     file(name).mkdirs()
 }
