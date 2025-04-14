@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/rcon/thread/RconClient.java
 +++ b/net/minecraft/server/rcon/thread/RconClient.java
-@@ -23,11 +_,14 @@
+@@ -23,11 +_,20 @@
      private final Socket client;
      private final byte[] buf = new byte[1460];
      private final String rconPassword;
@@ -9,6 +9,12 @@
 +    private final net.minecraft.server.dedicated.DedicatedServer serverInterface;
 +    private final net.minecraft.server.rcon.RconConsoleSource rconConsoleSource;
 +    // CraftBukkit end
++
++    // obsidian start
++    public final java.util.List<Long> failedAttempts = dev.jsco.obsidian.ObsidianConfig.failedRconAttempts;
++    public static final int MAX_ATTEMPTS = dev.jsco.obsidian.ObsidianConfig.maxRconAttempts;
++    public static final long TIME_WINDOW_MS = (long) dev.jsco.obsidian.ObsidianConfig.rconTimeWindow * 60 * 1000;
++    // obsidian end
  
      RconClient(ServerInterface serverInterface, String rconPassword, Socket client) {
          super("RCON Client " + client.getInetAddress());
@@ -25,7 +31,7 @@
      }
  
      @Override
-@@ -67,7 +_,7 @@
+@@ -67,27 +_,41 @@
                                  String string1 = PktUtils.stringFromByteArray(this.buf, i1, i);
  
                                  try {
@@ -34,3 +40,56 @@
                                  } catch (Exception var15) {
                                      this.sendCmdResponse(i3, "Error executing: " + string1 + " (" + var15.getMessage() + ")");
                                  }
+                                 break;
+                             }
+ 
+-                            this.sendAuthFailure();
++                            this.sendAuthFailure(""); // obsidian
+                             break;
+                         case 3:
+                             String string = PktUtils.stringFromByteArray(this.buf, i1, i);
+                             i1 += string.length();
++
++                            // obsidian start
++                            long currentTime = System.currentTimeMillis();
++                            failedAttempts.removeIf(t -> currentTime - t > TIME_WINDOW_MS);
++
++                            if (failedAttempts.size() >= MAX_ATTEMPTS) {
++                                this.sendAuthFailure("Please try again in " + dev.jsco.obsidian.ObsidianConfig.rconTimeWindow + " minutes.");
++                                break;
++                            }
++
+                             if (!string.isEmpty() && string.equals(this.rconPassword)) {
+                                 this.authed = true;
+                                 this.send(i3, 2, "");
+-                                break;
++                                LOGGER.debug("RCON authentication success");
++                                failedAttempts.clear();
++                            } else {
++                                this.authed = false;
++                                failedAttempts.add(currentTime);
++                                LOGGER.debug("RCON authentication failed, remaining attempts: {}", MAX_ATTEMPTS - failedAttempts.size());
++                                this.sendAuthFailure("Authentication failed, remaining attempts: " + (MAX_ATTEMPTS - failedAttempts.size()));
+                             }
+-
+-                            this.authed = false;
+-                            this.sendAuthFailure();
+                             break;
++                            // obsidian end
+                         default:
+                             this.sendCmdResponse(i3, String.format(Locale.ROOT, "Unknown request %s", Integer.toHexString(i4)));
+                     }
+@@ -118,9 +_,11 @@
+         this.client.getOutputStream().write(byteArrayOutputStream.toByteArray());
+     }
+ 
+-    private void sendAuthFailure() throws IOException {
+-        this.send(-1, 2, "");
++    // obsidian start
++    private void sendAuthFailure(String message) throws IOException {
++        this.send(-1, 2, message);
+     }
++    // obsidian end
+ 
+     private void sendCmdResponse(int id, String message) throws IOException {
+         int len = message.length();

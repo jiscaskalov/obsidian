@@ -88,7 +88,7 @@
          LOGGER.info("Loading properties");
          DedicatedServerProperties properties = this.settings.getProperties();
          if (this.isSingleplayer()) {
-@@ -132,13 +_,51 @@
+@@ -132,13 +_,52 @@
              this.setLocalIp(properties.serverIp);
          }
  
@@ -115,6 +115,7 @@
 +        this.server.spark.registerCommandBeforePlugins(this.server); // Paper - spark
 +        com.destroystokyo.paper.Metrics.PaperMetrics.startMetrics(); // Paper - start metrics
 +        com.destroystokyo.paper.VersionHistoryManager.INSTANCE.getClass(); // Paper - load version history now
++        dev.jsco.obsidian.ObsidianConfig.init(); // obsidian
 +
          this.setPvpAllowed(properties.pvp);
          this.setFlightAllowed(properties.allowFlight);
